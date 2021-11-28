@@ -32,7 +32,7 @@ export default function Climas() {
   };
 
   //pregunta a la URL cuales son los datos de dicho pais, los guarda en clima y hace funcionar el LOAD
-  function ObtenerClima(value) {
+  function ObtenerClima() {
     setLoad(true);
     fetch(
       `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${api.key}&units=metric`

@@ -37,21 +37,15 @@ export default function Climas() {
     setLoad(true);
 
     fetch(
-      `https://api.openweathermap.org/data/2.5/weather?q=${api.nombre}&appid=${api.key}&units=metric`
+      `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${api.key}&units=metric`
     )
       .then((res) => {
         if (res.status !== 200) {
           setError(true);
-          console.log("entro al error 200");
+          console.log("entro al error no 200");
+        } else {
+          return res.json();
         }
-        return res.json();
-      })
-      .then((res) => {
-        if (res.status !== 400) {
-          setError(true);
-          console.log("entro al error 400");
-        }
-        return res.json();
       })
       .catch((error) => console.error(error))
       .then((json) => {
@@ -67,11 +61,8 @@ export default function Climas() {
       .finally(() => setLoad(false));
   }
 
-  //Guardar en json en asyncStorage
-
-  //Esta funcion guarda los climas y los muestra
+  //Esta funcion guarda los climas en asyncStorage
   const guardarClima = async (e) => {
-    console.log(e);
     setLoad(true);
     try {
       let listaClimas = [];
@@ -79,7 +70,6 @@ export default function Climas() {
       //consulta la lista si tiene o no la ciudad para no repetir
       if (itemClima) {
         listaClimas = JSON.parse(itemClima);
-
         if (
           //busca el pais/ciudad en la lista
           listaClimas.find(
@@ -103,7 +93,6 @@ export default function Climas() {
           await AsyncStorage.setItem("listaClimas", jsonValue);
           alert("La ciudad fue agregada!");
           window.location.reload(true);
-          mostrarData(listaClimas);
         }
       } else {
         //pienso que nunca va a entrar acá
@@ -126,12 +115,14 @@ export default function Climas() {
   };
 
   /*
+  //mostrar todas las ciudades y si le dan al icono del corazon, los agrega a favoritos
   function mostrarData(inf) {
-    console.log(inf);
+    const listas = JSON.parse(inf);
+    console.log(listas);
     return (
       <SafeAreaView style={styles.container}>
         <ScrollView style={styles.scrollView}>
-          {inf.map((item) => (
+          {listas.map((item) => (
             <View style={styles.fondo}>
               <Text style={styles.ciudad}>
                 {item.ciudad + " " + item.temperatura + " °C"}
@@ -144,8 +135,8 @@ export default function Climas() {
               }
               <Icon
                 type="material"
-                name="delete"
-                onPress={() => BorrarClima(inf, item.ciudad)}
+                name="favorite-border"
+                onPress={() => EnviarClimaAFavorites(inf, item.ciudad)}
               />
               <Divider />
             </View>
@@ -175,7 +166,7 @@ export default function Climas() {
       />
       <Loading isVisible={load} text="Cargando.." />
       {
-        //clima ? mostrarData(clima) : console.log("no entra nucna")
+        //clima ? mostrarData(clima) : console.log("no muestraData")
       }
     </View>
   );

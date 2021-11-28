@@ -15,7 +15,7 @@ import Loading from "../components/Loading";
 export default function Favorites() {
   const [info, setInfo] = useState(null);
   const [load, setLoad] = useState(false);
-  console.log(info);
+  const [myCities, setMyCities] = useState(null);
   useEffect(async () => {
     setLoad(true);
     const lista = await AsyncStorage.getItem("listaClimas");
@@ -27,12 +27,11 @@ export default function Favorites() {
   function mostrarData(inf) {
     const listas = JSON.parse(inf);
     console.log(listas);
-
     return (
       <SafeAreaView style={styles.container}>
         <ScrollView style={styles.scrollView}>
           {listas.map((item) => (
-            <View style={styles.fondo}>
+            <View key={listas.ciudad} style={styles.fondo}>
               <Text style={styles.ciudad}>
                 {item.ciudad + " " + item.temperatura + " °C"}
               </Text>
@@ -55,11 +54,8 @@ export default function Favorites() {
     );
   }
 
-  function BorrarClima(borraCiudad, nombre) {
-    console.log(borraCiudad); //te pasa la lista
-    console.log(nombre); //te pasa el nombre para borrar la ciudad
-
-    console.log(borraCiudad(nombre));
+  async function BorrarClima(borraCiudad, nombre) {
+    setLoad(true);
     if (
       //compara y busca la ciudad
       borraCiudad.find(
@@ -69,11 +65,21 @@ export default function Favorites() {
     ) {
       //la encuentra y la remueve de la lista
       //borraCiudad.splice(nombre);
+      try {
+        const cortar = borraCiudad.filter((item) => item.ciudad !== nombre);
+        const json_value = JSON.stringify(cortar);
+        await AsyncStorage.setItem("listaClimas", json_value);
+        setMyCities(cortar);
+        window.location.reload(true);
+        setLoad(true);
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
 
   function BorrarTodo() {
-    // AsyncStorage.clear();
+    AsyncStorage.clear();
     console.log("borrado pa2");
   }
 
@@ -104,7 +110,7 @@ const styles = StyleSheet.create({
     fontSize: 40,
   },
   ciudad: {
-    fontSize: 25,
+    fontSize: 20,
   },
   btnClima: {
     backgroundColor: "#03e3fc",

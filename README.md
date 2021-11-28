@@ -10,3 +10,5 @@ react-native-elements
 expo install react-native-screens
 react-native-safe-area-context
 @react-native-async-storage/async-storage
+
+esto es el desarrollo 2 para cagarlo a piñas

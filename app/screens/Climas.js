@@ -1,5 +1,12 @@
 import React, { useState } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import {
+  StyleSheet,
+  Text,
+  View,
+  SafeAreaView,
+  ScrollView,
+  StatusBar,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Input, Button, Icon } from "react-native-elements";
 
@@ -12,31 +19,37 @@ export default function Climas() {
   const [load, setLoad] = useState(false);
   //estado por si hay un error (200)
   const [error, setError] = useState(false);
+
   //verifica cuando el usuario ingresa los datos (osea, los paises)
   const [cityName, setcityName] = useState("");
-
   //obitene el nombre del pais
   const handleInputChange = ({ target }) => {
     setcityName(target.value);
   };
-
   //es la URL con todos los datos
   const api = {
-    name: "arg",
     key: "caa5a41856bc9c627d6ba263aba38a03",
-    base: "https://api.openweathermap.org/data/2.5/weather?q=",
+    nombre: cityName,
   };
 
   //pregunta a la URL cuales son los datos de dicho pais, los guarda en clima y hace funcionar el LOAD
   function ObtenerClima() {
     setLoad(true);
+
     fetch(
-      `https://api.openweathermap.org/data/2.5/weather?q=${api.name}&appid=${api.key}&units=metric`
+      `https://api.openweathermap.org/data/2.5/weather?q=${api.nombre}&appid=${api.key}&units=metric`
     )
       .then((res) => {
         if (res.status !== 200) {
           setError(true);
-          console.log("entro al error");
+          console.log("entro al error 200");
+        }
+        return res.json();
+      })
+      .then((res) => {
+        if (res.status !== 400) {
+          setError(true);
+          console.log("entro al error 400");
         }
         return res.json();
       })
@@ -45,10 +58,8 @@ export default function Climas() {
         if (json) {
           setClima(json);
           guardarClima(json);
-          console.log("entro al json");
-          console.log(json);
         } else {
-          console.log("erro en el json");
+          console.log("error en el json");
         }
         setcityName("");
       })
@@ -61,44 +72,51 @@ export default function Climas() {
   //Esta funcion guarda los climas y los muestra
   const guardarClima = async (e) => {
     console.log(e);
-    //setLoad(true);
+    setLoad(true);
     try {
       let listaClimas = [];
       const itemClima = await AsyncStorage.getItem("listaClimas");
+      //consulta la lista si tiene o no la ciudad para no repetir
       if (itemClima) {
-        console.log("item-clima");
         listaClimas = JSON.parse(itemClima);
+
         if (
+          //busca el pais/ciudad en la lista
           listaClimas.find(
             (item) =>
               item.ciudad.trim().toUpperCase() === e.name.trim().toUpperCase()
           )
         ) {
-          return setError("Esta ciudad ya existe, por favor asignar otra");
+          //Si encuentra la cdd en la lista, manda un alert con la ciudad
+          alert("Esta ciudad ya existe, es: " + e.name + e.main.temp + " °C");
         } else {
+          //si no la encontró, agrega la ciudad a la lista
           listaClimas.push({
             ciudad: e.name.trim().toUpperCase(),
             temperatura: e.main.temp,
             Descripcion: e.weather[0].description,
             Humedad: e.main.humidity,
-            Icon: e.weather[0].Icon,
+            Icon_primero: e.weather[0].icon,
+            Icon_segundo: e.weather[0].main,
           });
           const jsonValue = JSON.stringify(listaClimas);
           await AsyncStorage.setItem("listaClimas", jsonValue);
-
-          alert("Ciudad agregada!");
+          alert("La ciudad fue agregada!");
+          window.location.reload(true);
+          mostrarData(listaClimas);
         }
       } else {
-        console.log("no hay item-clima");
+        //pienso que nunca va a entrar acá
+        console.log("entro al 3");
         listaClimas.push({
           ciudad: e.name.trim().toUpperCase(),
           temperatura: e.main.temp,
           Descripcion: e.weather[0].description,
           Humedad: e.main.humidity,
-          Icon: e.weather[0].Icon,
+          Icon_primero: e.weather[0].icon,
+          Icon_segundo: e.weather[0].main,
         });
         const jsonValue = JSON.stringify(listaClimas);
-        console.log(jsonValue);
         await AsyncStorage.setItem("listaClimas", jsonValue);
       }
       setLoad(false);
@@ -107,6 +125,36 @@ export default function Climas() {
     }
   };
 
+  /*
+  function mostrarData(inf) {
+    console.log(inf);
+    return (
+      <SafeAreaView style={styles.container}>
+        <ScrollView style={styles.scrollView}>
+          {inf.map((item) => (
+            <View style={styles.fondo}>
+              <Text style={styles.ciudad}>
+                {item.ciudad + " " + item.temperatura + " °C"}
+              </Text>
+              <Text>{item.Descripcion}</Text>
+              <Text>{item.Humedad}</Text>
+              {
+                //no funciona el icono..
+                //<Icon name={item.Icon_primero} type={item.Icon_segundo}></Icon>
+              }
+              <Icon
+                type="material"
+                name="delete"
+                onPress={() => BorrarClima(inf, item.ciudad)}
+              />
+              <Divider />
+            </View>
+          ))}
+        </ScrollView>
+      </SafeAreaView>
+    );
+  }
+*/
   return (
     <View style={styles.fondo}>
       <Input
@@ -125,11 +173,10 @@ export default function Climas() {
         onPress={() => ObtenerClima()}
         buttonStyle={styles.btnClima}
       />
-      {
-        //clima ? guardarClima() : console.log("Faltan Datos")
-      }
-
       <Loading isVisible={load} text="Cargando.." />
+      {
+        //clima ? mostrarData(clima) : console.log("no entra nucna")
+      }
     </View>
   );
 }
@@ -140,7 +187,6 @@ const styles = StyleSheet.create({
     height: "100%",
     flex: 1,
     alignItems: "center",
-    justifyContent: "center",
   },
   inputForm: {
     width: "80%",
@@ -148,10 +194,18 @@ const styles = StyleSheet.create({
     margin: "auto",
   },
   btnClima: {
+    backgroundColor: "#03e3fc",
     marginTop: 20,
     width: "30%",
   },
   ciudad: {
     fontSize: 30,
+  },
+  container: {
+    flex: 1,
+    paddingTop: StatusBar.currentHeight,
+  },
+  scrollView: {
+    marginHorizontal: 20,
   },
 });

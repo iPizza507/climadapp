@@ -26,7 +26,11 @@ Nosotros: mejorar visualmente
 Para inicializarlo:
 En el CMD tienen que poner:
 cd "destino de la carpeta donde lo tienen"
-yarn start
+npm install
+*esperar a que termine la descarga y luego cerrar el CMD*
 
-Apretar W para que se les abra en WEB
+*abrir de vuelta cmd y poner: cd "destino de la carpeta donde lo tienen"*
+yarn start
+Se les abre el Metro Bundler
+Apretar W en CMD para que se les abra en WEB
 y navegar!

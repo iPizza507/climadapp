@@ -50,6 +50,7 @@ export default function Climas() {
         if (json) {
           setClima(json);
           guardarClima(json);
+          console.log(json);
         } else {
           console.log("error en el json");
         }

@@ -29,20 +29,18 @@ export default function Climas() {
   //es la URL con todos los datos
   const api = {
     key: "caa5a41856bc9c627d6ba263aba38a03",
-    nombre: cityName,
   };
 
   //pregunta a la URL cuales son los datos de dicho pais, los guarda en clima y hace funcionar el LOAD
   function ObtenerClima() {
     setLoad(true);
-
     fetch(
       `https://api.openweathermap.org/data/2.5/weather?q=${cityName}&appid=${api.key}&units=metric`
     )
       .then((res) => {
         if (res.status !== 200) {
           setError(true);
-          console.log("entro al error no 200");
+          console.log("Hubo algun error");
         } else {
           return res.json();
         }
@@ -52,6 +50,7 @@ export default function Climas() {
         if (json) {
           setClima(json);
           guardarClima(json);
+          console.log(json);
         } else {
           console.log("error en el json");
         }

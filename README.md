@@ -23,3 +23,10 @@ Favorites: solucionar el error de consola (key), arreglar el tema de recarga de 
 Clima: arreglar el tema de recarga de pagina y mejorar visualmente, ademas de que en web si se puede utilizar, pero en android No (por un tema de tiempos, el fetch no llega a mandar los datos porque no obitene a tiempo el nombre de la ciudad, osea del input)
 Nosotros: mejorar visualmente
 
+Para inicializarlo:
+En el CMD tienen que poner:
+cd "destino de la carpeta donde lo tienen"
+yarn start
+
+Apretar W para que se les abra en WEB
+y navegar!
